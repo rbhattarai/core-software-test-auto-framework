@@ -1,0 +1,1 @@
+# core-software-test-auto-framework
