@@ -11,7 +11,10 @@ import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +29,6 @@ public class ComponentTests {
         textbox  = new ComponentFactory(driver).getComponent(ComponentType.TEXTBOX);
         button = new ComponentFactory(driver).getComponent(ComponentType.BUTTON);
         driver.manage().window().maximize();
-
     }
 
     @AfterAll
@@ -48,8 +50,11 @@ public class ComponentTests {
 //        textbox.type(bySearchTextBox, searchText);
 //        textbox.submit(bySearchTextBox);
 
-        List<String> headings = this.getValues(driver.findElements(By.tagName("h3")));
-        Assert.isTrue(headings.contains(searchText.toString()), "Heading didn't match");
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+        wait.until(ExpectedConditions.titleContains(searchText));
+        List<WebElement> allHeaders = driver.findElements(By.cssSelector("* h3"));
+        List<String> headings = this.getValues(allHeaders);
+        Assert.isTrue(headings.contains(searchText), "Heading didn't match");
     }
 
     private List<String> getValues(List<WebElement> elements) {
