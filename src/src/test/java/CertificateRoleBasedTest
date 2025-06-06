@@ -1,0 +1,53 @@
+package com.example;
+
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.edge.EdgeDriver;
+import org.openqa.selenium.edge.EdgeOptions;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class CertificateRoleBasedTest {
+
+    public static void main(String[] args) {
+        String browser = System.getProperty("browser", "chrome");
+        String role = System.getProperty("cert.role", "admin");
+
+        String subjectCN = switch (role.toLowerCase()) {
+            case "admin" -> "rohan_bhattarai_proj_admin";
+            case "owner" -> "rohan_bhattarai_proj_owner";
+            case "user" -> "rohan_bhattarai_proj_user";
+            default -> throw new IllegalArgumentException("Unknown role: " + role);
+        };
+
+        Map<String, Object> certPrefs = new HashMap<>();
+        certPrefs.put("pattern", "https://your-client-webapp.com");
+        certPrefs.put("filter", "{\"SUBJECT\":{\"CN\":\"" + subjectCN + "\"}}");
+
+        WebDriver driver;
+
+        if (browser.equalsIgnoreCase("edge")) {
+            EdgeOptions options = new EdgeOptions();
+            options.setExperimentalOption("autoSelectCertificateForUrls", new Object[]{certPrefs});
+            options.addArguments("--ignore-certificate-errors");
+            driver = new EdgeDriver(options);
+        } else {
+            ChromeOptions options = new ChromeOptions();
+            options.setExperimentalOption("autoSelectCertificateForUrls", new Object[]{certPrefs});
+            options.addArguments("--ignore-certificate-errors");
+            driver = new ChromeDriver(options);
+        }
+
+        try {
+            driver.get("https://your-client-webapp.com");
+            Thread.sleep(10000); // Wait for landing page to load
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            driver.quit();
+        }
+    }
+}
+
